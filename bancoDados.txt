@@ -1,0 +1,132 @@
+CREATE DATABASE IF NOT EXISTS sucos;
+DROP DATABASE sucos;
+USE sucos;
+
+CREATE TABLE tbcliente
+( cpf VARCHAR (11) ,nome VARCHAR (100) ,endereco1 VARCHAR (150) ,endereco2 VARCHAR (150) ,bairro VARCHAR (50) ,cidade VARCHAR (50) ,estado VARCHAR (2) ,cep VARCHAR (8) ,data_nascimento DATE,
+idade SMALLINT,sexo VARCHAR (1) ,limite_credito FLOAT ,volume_compra FLOAT ,primeira_compra BIT );
+DROP TABLE tbcliente;
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ALTER TABLE tbcliente ADD PRIMARY KEY (cpf);
+ALTER TABLE tbcliente ADD telefone VARCHAR(20);
+ALTER TABLE tbcliente DROP COLUMN telefone; 
+
+Modify
+
+Pode ser utilizado para alterar as definições de uma coluna, mas não o seu nome, por exemplo:
+
+CREATE TABLE clientes(
+    nome int,
+    id int,
+    endereco int
+);
+
+ALTER TABLE clientes MODIFY COLUMN nome VARCHAR(50);
+
+
+
+Change
+
+Pode ser utilizado para renomear uma coluna e alterar suas definições, como o tipo de dados de uma coluna, por exemplo:
+
+CREATE TABLE clientes(
+    nome int,
+    id int,
+    endereco int
+);
+
+ALTER TABLE clientes CHANGE COLUMN nome nome_cliente VARCHAR(50);
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO tbcliente (cpf,nome,endereco1,endereco2,bairro,cidade,estado,cep,data_nascimento,idade,sexo,limite_credito,volume_compra,primeira_compra) VALUES ('19290992743','Fernando Cavalcante','R. Dois de Fevereiro','','Água Santa','Rio de Janeiro','RJ','22000000','2000-02-12',18,'M',100000,200000,1);
+
+INSERT INTO tbproduto (produto, nome, embalagem, tamanho, sabor, preco_lista) VALUES ('1040107','Light - 350 ml - Melância','Lata','350 ml','Melância',4.555);
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+UPDATE tbproduto SET EMBALAGEM = "LATA" , preço = 4.90 WHERE produto = '7896984';
+
+DELETE FROM tbproduto WHERE produto = '9870987';
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM tbcliente;
+SELECT cpf AS cpf_cliente FROM tbcliente;
+SELECT nome,cpf,idade,data_nascimento FROM tbcliente;
+
+SELECT * FROM tbcliente;
+SELECT * FROM tbcliente LIMIT 5;
+SELECT * FROM tbcliente LIMIT 5;
+SELECT * FROM tbcliente LIMIT 2,3;
+SELECT * FROM tbcliente LIMIT 0,2;
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM tbcliente WHERE cidade = 'rio de janeiro';
+
+SELECT * FROM tbcliente WHERE idade > 23;
+SELECT * FROM tbcliente WHERE idade < 24;
+SELECT * FROM tbcliente WHERE nome > bruno; <- nesse caso serão listados todos os nomes alfabeticamente maiores que o meu;
+SELECT * FROM tbcliente WHERE nome >= bruno;
+SELECT * FROM tbcliente WHERE nome <> bruno;
+SELECT * FROM tbcliente WHERE preco = 12.45; <- isso não vai me retornar nada pq a variável preco possui valores que são pontos flutuantes. O sql enxerga 12,45 como 12,45678 logo ele não encontra 							esse valor. Vc pode usar para isso:
+							SELECT * FROM tbcliente WHERE preco > 12.44 AND PRECO <12.46; OU
+							SELECT * FROM tbcliente WHERE preco BETWEEN 12.44 AND 12.46;
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM tbcliente WHERE data_nascimento = '1995-05-12';
+SELECT * FROM tbcliente WHERE data_nascimento >'1995-05-12';
+SELECT * FROM tbcliente WHERE data_nascimento > '1995-05-12' AND data_nascimento > '2005-05-01' ;	
+SELECT * FROM tbcliente WHERE YEAR(dataNascimento) = 1995;
+SELECT * FROM tbcliente WHERE MONTH(dataNascimento) = 1995;
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM tbcliente WHERE (idade>=18 AND idade <=21 AND sexo = 'M') OR (cidade = 'Rio de Janeiro' OR bairro = 'Jardins');
+
+SELECT * FROM tbproduto WHERE sabor IN ('manga','laranja') = SELECT * FROM tbproduto WHERE sabor = 'manga' or sabor ='laranja';
+SELECT * FROM tbproduto WHERE cidade IN ('Rio de Janeiro','São Paulo') AND (idade >= 20 AND idade <= 24);
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM tbcliente WHERE nome LIKE '%ferreira%'; 
+SELECT * FROM tbproduto WHERE sabor LIKE '%Maça%';
+SELECT * FROM tbproduto WHERE sabor LIKE '%Maça%' AND embalagem = 'PET';
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT DISTINCT embalagem, tamanho FROM tbprodutos; <-se existir uma linha que possua embalagem e tamanho igual ele só retornará 1
+
+SELECT DISTINCT * FROM tbproduto; 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM tabela_de_produtos;
+
+SELECT * FROM tbproduto ORDER BY preco_de_lista;
+SELECT * FROM tbproduto ORDER BY preco_de_lista DESC;
+SELECT * FROM tbproduto ORDER BY nome_do_produto;
+SELECT * FROM tbproduto ORDER BY nome_do_produto DESC;
+SELECT * FROM tabela_de_produtos ORDER BY embalagem DESC, nome_do_produto ASC;
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM tabela_de_clientes;
+SELECT estado, limite_de_credito FROM tbcliente;
+SELECT estado, SUM(limite_de_credito) AS limite_total FROM tbcliente GROUP BY estado;
+SELECT embalagem, preco_de_lista FROM tbproduto;
+SELECT embalagem, MAX(preco_de_lista) AS maior_preco FROM tbproduto GROUP BY embalagem;
+SELECT embalagem, COUNT(*) AS contador FROM tbproduto GROUP BY embalagem;
+SELECT bairro, SUM(limite_de_credito) AS limite FROM tbcliente GROUP BY bairro;
+SELECT bairro, SUM(LIMITE_DE_CREDITO) AS limite FROM tbcliente WHERE cidade = 'Rio de Janeiro' GROUP BY bairro;
+SELECT estado, bairro, SUM(limite_de_credito) AS limite FROM tbcliente GROUP BY estado, bairro;
+SELECT estado, bairro, SUM(limite_de_credito) AS limite FROM tbcliente WHERE cidade = 'Rio de Janeiro' GROUP BY estado, bairro;
+SELECT estado, bairro, SUM(LIMITE_DE_CREDITO) AS limite FROM tbcliente WHERE cidade = 'Rio de Janeiro' GROUP BY estado, bairro ORDER BY bairro;
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SELECT * FROM tabela_de_vendedores;
+SELECT * FROM notas_fiscais;
+
+SELECT * FROM tabela_de_vendedores A
+INNER JOIN notas_fiscais B
+ON A.MATRICULA = B.MATRICULA;
+
+SELECT A.MATRICULA, A.NOME, COUNT(*) FROM
+tabela_de_vendedores A
+INNER JOIN notas_fiscais B
+ON A.MATRICULA = B.MATRICULA
+GROUP BY A.MATRICULA, A.NOME;
+
+SELECT A.MATRICULA, A.NOME, COUNT(*) FROM
+tabela_de_vendedores A, notas_fiscais B
+WHERE A.MATRICULA = B.MATRICULA
+GROUP BY A.MATRICULA, A.NOME;
+
+
+
+
